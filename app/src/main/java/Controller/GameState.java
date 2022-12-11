@@ -30,14 +30,6 @@ public record GameState(ShipController shipController, List<MovingEntity> entiti
                     MyFileWriter fileWriter = new MyFileWriter(System.getProperty("user.dir") + "/app/src/main/java/FileManager/SavedGameFile.txt");
                     fileWriter.saveGame(this.shipController.ship(), this.entities);
                 }
-                case H -> {
-                    MyFileReader fileReader = new MyFileReader(System.getProperty("user.dir") + "/app/src/main/java/FileManager/SavedGameFile.txt");
-                    try {
-                        fileReader.loadGame();
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
             }
             return this;
         }

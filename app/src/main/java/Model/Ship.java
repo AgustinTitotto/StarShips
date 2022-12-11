@@ -16,8 +16,9 @@ public class Ship implements MovingEntity, Serializable {
     private final double degrees;
     private final double size;
     private final ElementColliderType colliderType;
+    private final double points;
 
-    public Ship(String id, double topSpeed, double acceleration, double currentSpeed, Weapon weapon, int lives, Position position, double degrees, double size, ElementColliderType colliderType){
+    public Ship(String id, double topSpeed, double acceleration, double currentSpeed, Weapon weapon, int lives, Position position, double degrees, double size, ElementColliderType colliderType, double points){
         this.id = id;
         this.topSpeed = topSpeed;
         this.acceleration = acceleration;
@@ -28,7 +29,7 @@ public class Ship implements MovingEntity, Serializable {
         this.degrees = degrees;
         this.size = size;
         this.colliderType = colliderType;
-
+        this.points = points;
     }
 
     public String getId() {
@@ -69,5 +70,9 @@ public class Ship implements MovingEntity, Serializable {
 
     public ElementColliderType getColliderType() {
         return colliderType;
+    }
+
+    public double getPoints() {
+        return points;
     }
 }

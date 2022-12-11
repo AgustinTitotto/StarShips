@@ -6,21 +6,20 @@ import Controller.GameState
 import Controller.ShipController
 import FileManager.MyFileReader
 import Model.MovingEntity
-import Model.Position
 import Model.Ship
-import Model.Weapon
 import edu.austral.ingsis.starships.ui.*
-import edu.austral.ingsis.starships.ui.ElementColliderType.Triangular
 import javafx.application.Application
 import javafx.application.Application.launch
 import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.Scene
+import javafx.scene.control.ComboBox
 import javafx.scene.control.Label
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.stage.Stage
+
 
 private val imageResolver = CachedImageResolver(DefaultImageResolver())
 private var facade = ElementsViewFacade(imageResolver)
@@ -36,7 +35,11 @@ class MyApp : Application() {
 
 
     companion object {
-        val STARSHIP_IMAGE_REF = ImageRef("starship", 70.0, 70.0) // Esto es la definicion
+        val GREY_IMAGE_REF = ImageRef("greyStarship", 70.0, 70.0) // Esto es la definicion
+        val BLUE_IMAGE_REF = ImageRef("blueStarShip", 70.0, 70.0)
+        val GREEN_IMAGE_REF = ImageRef("greenStarShip", 70.0, 70.0)
+        val RED_IMAGE_REF = ImageRef("redStarShip", 70.0, 70.0)
+
 
         fun setLabelStyle(loadGame: Label) {
             loadGame.textFill = Color.BLACK
@@ -50,31 +53,58 @@ class MyApp : Application() {
             }
         }
 
-        fun startNewGame(primaryStage: Stage) {
+        fun startNewGame(primaryStage: Stage,  value: String) {
             gameController = GameController(initialState())
-            val starship = ElementModel("starship", DEFAULT_STARTING_X, DEFAULT_STARTING_Y, DEFAULT_STARSHIP_SIZE, DEFAULT_STARSHIP_SIZE, DEFAULT_STARTING_ROTATION + 180, DEFAULT_COLLIDER_TYPE, STARSHIP_IMAGE_REF)
-            startGame(starship, primaryStage)
+            val starship = ElementModel("starship", DEFAULT_STARTING_X, DEFAULT_STARTING_Y, DEFAULT_STARSHIP_SIZE, DEFAULT_STARSHIP_SIZE, DEFAULT_STARTING_ROTATION + 180, DEFAULT_COLLIDER_TYPE, getImageRef(value))
+            startGame(starship, primaryStage, value)
         }
 
-        fun startGame(starship: ElementModel, primaryStage: Stage) {
+        fun startGame(starship: ElementModel, primaryStage: Stage, value: String) {
             facade = ElementsViewFacade(imageResolver);
             keyTracker = KeyTracker()
             facade.elements["starship"] = starship
 
-            val scene = Scene(facade.view)
+            val layout = VBox()
+            val labels = HBox(50.0)
+            labels.alignment = Pos.TOP_CENTER
+
+            val lives = Label("Lives")
+            lives.alignment = Pos.CENTER
+            lives.textFill = Color.BLACK
+            lives.style = "-fx-font-family: 'Agency FB'; -fx-font-size: 40"
+
+            val points = Label("Points")
+            points.alignment = Pos.CENTER
+            points.textFill = Color.BLACK
+            points.style = "-fx-font-family: 'Agency FB'; -fx-font-size: 40"
+
+            labels.children.addAll(lives, points)
+            layout.children.addAll(labels, facade.view)
+
+            val scene = Scene(layout)
             keyTracker.scene = scene
 
             primaryStage.scene = scene
             primaryStage.height = Y_SIZE
             primaryStage.width = X_SIZE
 
-            facade.timeListenable.addEventListener(MyTimeListener(primaryStage))
+            facade.timeListenable.addEventListener(MyTimeListener(primaryStage, lives, points, value))
             facade.collisionsListenable.addEventListener(MyCollisionListener());
             keyTracker.keyPressedListenable.addEventListener(MyPressKeyListener())
 
             facade.start()
             keyTracker.start()
             primaryStage.show()
+        }
+
+        fun getImageRef(value: String): ImageRef {
+            when(value) {
+                "Grey" -> return GREY_IMAGE_REF
+                "Blue" -> return BLUE_IMAGE_REF
+                "Green" -> return GREEN_IMAGE_REF
+                "Red" -> return RED_IMAGE_REF
+            }
+            return GREY_IMAGE_REF
         }
     }
 
@@ -88,20 +118,29 @@ class MyApp : Application() {
         val options = HBox(100.0)
         options.alignment = Pos.CENTER
 
+        val skins: ComboBox<String> = ComboBox<String>()
+        skins.items.addAll(
+            "Grey",
+            "Blue",
+            "Green",
+            "Red"
+        )
+        skins.selectionModel.select(0)
+
         val startNewGame = Label("Start new game")
         setLabelStyle(startNewGame)
         startNewGame.setOnMouseClicked {
-            startNewGame(primaryStage)
+            startNewGame(primaryStage, skins.value)
         }
 
         val loadGame = Label("Load Game")
         setLabelStyle(loadGame)
         loadGame.setOnMouseClicked {
-            loadGame(primaryStage)
+            loadGame(primaryStage, skins.value)
         }
 
         options.children.addAll(startNewGame, loadGame)
-        layout.children.addAll(name, options)
+        layout.children.addAll(name, options, skins)
 
         val scene = Scene(layout)
         primaryStage.scene = scene
@@ -111,23 +150,29 @@ class MyApp : Application() {
         primaryStage.show()
     }
 
-    private fun loadGame(primaryStage: Stage) {
+    private fun loadGame(primaryStage: Stage, value: String) {
         val fileReader = MyFileReader(System.getProperty("user.dir") + "/app/src/main/java/FileManager/SavedGameFile.txt")
         gameController = GameController(fileReader.loadGame());
         val ship = gameController.gameState.shipController.ship
-        val starship = ElementModel("starship", ship.position.x, ship.position.y, ship.size, ship.size, ship.degrees + 180, ship.colliderType, STARSHIP_IMAGE_REF)
-        startGame(starship, primaryStage)
+        val starship = ElementModel("starship", ship.position.x, ship.position.y, ship.size, ship.size, ship.degrees + 180, ship.colliderType, getImageRef(value))
+        startGame(starship, primaryStage, value)
     }
 
-    class MyTimeListener(private val primaryStage: Stage) : EventListener<TimePassed> {
+    class MyTimeListener(private val primaryStage: Stage, private val lives: Label, private val points: Label, private val skin: String) : EventListener<TimePassed> {
         override fun handle(event: TimePassed) {
             gameController = gameController.moveElements();
             updateElements()
-            checkDefeat(gameController.gameState.shipController.ship, primaryStage)
+            updateGameScore(gameController.gameState.shipController.ship, lives, points)
+            checkDefeat(gameController.gameState.shipController.ship, primaryStage, skin)
             gameController = gameController.cleanElements(gameController)
         }
 
-        private fun checkDefeat(ship: Ship, primaryStage: Stage) {
+        private fun updateGameScore(ship: Ship, lives: Label, points: Label) {
+            lives.text = "Lives: " + ship.lives.toString()
+            points.text = "Points: " + ship.points.toString()
+        }
+
+        private fun checkDefeat(ship: Ship, primaryStage: Stage, skin : String) {
             if (ship.lives <= 0) {
                 val layout = VBox(100.0)
                 layout.alignment = Pos.CENTER
@@ -141,9 +186,8 @@ class MyApp : Application() {
                 val startNewGame = Label("Start new game")
                 setLabelStyle(startNewGame)
                 startNewGame.setOnMouseClicked {
-                    startNewGame(primaryStage)
+                    startNewGame(primaryStage, skin)
                 }
-
                 options.children.add(startNewGame)
                 layout.children.addAll(name, options);
 
@@ -207,7 +251,7 @@ class MyApp : Application() {
 
 
 private fun initialState(): GameState {
-    val ship = Ship("starship", 0.8, 0.2, 0.0, Weapon(10.0, 2.0), 3, Position(300.0, 300.0), 90.0, 40.0, Triangular);
+    val ship = DEFAULT_SHIP
     val shipController = ShipController(ship);
     val gameState = GameState(shipController, ArrayList<MovingEntity>(), ArrayList<MovingEntity>(), false);
     return gameState

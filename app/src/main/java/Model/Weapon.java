@@ -1,23 +1,25 @@
 package Model;
 
+import edu.austral.ingsis.starships.ui.ElementColliderType;
+
 import java.io.Serializable;
 
 public class Weapon implements Serializable {
 
 
     private final double damage;
-    private final double fireRate;
+    private final ElementColliderType type;
 
-    public Weapon(double damage, double fireRate){
+    public Weapon(double damage, ElementColliderType fireRate){
         this.damage = damage;
-        this.fireRate = fireRate;
+        this.type = fireRate;
     }
 
     public double getDamage() {
         return damage;
     }
 
-    public double getFireRate() {
-        return fireRate;
+    public ElementColliderType getType() {
+        return type;
     }
 }
