@@ -29,7 +29,7 @@ class Starships() : Application() {
         facade.elements["asteroid-3"] =
             ElementModel("asteroid-3", 200.0, 200.0, 20.0, 30.0, 180.0, Elliptical, null)
 
-        val starship = ElementModel("starship", 300.0, 300.0, 40.0, 40.0, 270.0, Triangular, STARSHIP_IMAGE_REF)
+        val starship = ElementModel("starship", 300.0, 300.0, 40.0, 40.0, 0.0, Triangular, STARSHIP_IMAGE_REF)
         facade.elements["starship"] = starship
 
         facade.timeListenable.addEventListener(TimeListener(facade.elements))
@@ -70,8 +70,9 @@ class TimeListener(private val elements: Map<String, ElementModel>) : EventListe
                 }
             }
 
-            element.rotationInDegrees.set(element.rotationInDegrees.value + 1)
+            //element.rotationInDegrees.set(element.rotationInDegrees.value + 1) Hace que gire la nave
         }
+
     }
 }
 
@@ -87,8 +88,13 @@ class KeyPressedListener(private val starship: ElementModel): EventListener<KeyP
         when(event.key) {
             KeyCode.UP -> starship.y.set(starship.y.value - 5 )
             KeyCode.DOWN -> starship.y.set(starship.y.value + 5 )
-            KeyCode.LEFT -> starship.x.set(starship.x.value - 5 )
-            KeyCode.RIGHT -> starship.x.set(starship.x.value + 5 )
+            KeyCode.LEFT -> starship.rotationInDegrees.set(starship.rotationInDegrees.value - 10)
+            KeyCode.RIGHT -> {
+
+                starship.rotationInDegrees.set(starship.rotationInDegrees.value + 10)
+            }
+            //KeyCode.LEFT -> starship.x.set(starship.x.value - 5 )
+            //KeyCode.RIGHT -> starship.x.set(starship.x.value + 5 )
             else -> {}
         }
     }
