@@ -60,6 +60,37 @@ class MyApp : Application() {
             facade.elements["starship"] = starship
 
             val layout = VBox()
+            layout.style = ("-fx-background-image: url('background_image.jpg')")
+
+            val (labels, lives, points) = setGameLabels()
+
+            labels.children.addAll(lives, points)
+            layout.children.addAll(labels, facade.view)
+
+            val scene = Scene(layout)
+            keyTracker.scene = scene
+
+            setScene(primaryStage, scene)
+
+            startListeners(primaryStage, lives, points, value)
+
+            facade.start()
+            keyTracker.start()
+            primaryStage.show()
+        }
+
+        private fun startListeners(
+            primaryStage: Stage,
+            lives: Label,
+            points: Label,
+            value: String
+        ) {
+            facade.timeListenable.addEventListener(MyTimeListener(primaryStage, lives, points, value))
+            facade.collisionsListenable.addEventListener(MyCollisionListener())
+            keyTracker.keyPressedListenable.addEventListener(MyPressKeyListener())
+        }
+
+        private fun setGameLabels(): Triple<HBox, Label, Label> {
             val labels = HBox(50.0)
             labels.alignment = Pos.TOP_CENTER
 
@@ -72,23 +103,7 @@ class MyApp : Application() {
             points.alignment = Pos.CENTER
             points.textFill = Color.WHITE
             points.style = "-fx-font-family: 'Agency FB'; -fx-font-size: 40"
-
-            labels.children.addAll(lives, points)
-            layout.children.addAll(labels, facade.view)
-
-            layout.style = ("-fx-background-image: url('background_image.jpg')")
-            val scene = Scene(layout)
-            keyTracker.scene = scene
-
-            setScene(primaryStage, scene)
-
-            facade.timeListenable.addEventListener(MyTimeListener(primaryStage, lives, points, value))
-            facade.collisionsListenable.addEventListener(MyCollisionListener())
-            keyTracker.keyPressedListenable.addEventListener(MyPressKeyListener())
-
-            facade.start()
-            keyTracker.start()
-            primaryStage.show()
+            return Triple(labels, lives, points)
         }
 
         private fun setScene(primaryStage: Stage, scene: Scene) {
@@ -111,6 +126,40 @@ class MyApp : Application() {
     override fun start(primaryStage: Stage) {
         val layout = VBox(100.0)
         layout.alignment = Pos.CENTER
+        layout.style = ("-fx-background-image: url('background_image.jpg')")
+        val (name, options, skins: ComboBox<String>) = setLayoutLabels()
+
+        val (startNewGame, loadGame) = setLayoutOptions(primaryStage, skins)
+
+        options.children.addAll(startNewGame, loadGame)
+        layout.children.addAll(name, options, skins)
+
+
+        val scene = Scene(layout)
+        setScene(primaryStage, scene)
+
+        primaryStage.show()
+    }
+
+    private fun setLayoutOptions(
+        primaryStage: Stage,
+        skins: ComboBox<String>
+    ): Pair<Label, Label> {
+        val startNewGame = Label("Start new game")
+        setOnClickLabelStyle(startNewGame)
+        startNewGame.setOnMouseClicked {
+            startNewGame(primaryStage, skins.value)
+        }
+
+        val loadGame = Label("Load Game")
+        setOnClickLabelStyle(loadGame)
+        loadGame.setOnMouseClicked {
+            loadGame(primaryStage, skins.value)
+        }
+        return Pair(startNewGame, loadGame)
+    }
+
+    private fun setLayoutLabels(): Triple<Label, HBox, ComboBox<String>> {
         val name = Label("StarShip")
         name.textFill = Color.WHITE
         name.style = "-fx-font-family: 'Agency FB'; -fx-font-size: 100"
@@ -127,27 +176,7 @@ class MyApp : Application() {
             "Red"
         )
         skins.selectionModel.select(0)
-
-        val startNewGame = Label("Start new game")
-        setOnClickLabelStyle(startNewGame)
-        startNewGame.setOnMouseClicked {
-            startNewGame(primaryStage, skins.value)
-        }
-
-        val loadGame = Label("Load Game")
-        setOnClickLabelStyle(loadGame)
-        loadGame.setOnMouseClicked {
-            loadGame(primaryStage, skins.value)
-        }
-
-        options.children.addAll(startNewGame, loadGame)
-        layout.children.addAll(name, options, skins)
-
-        layout.style = ("-fx-background-image: url('background_image.jpg')")
-        val scene = Scene(layout)
-        setScene(primaryStage, scene)
-
-        primaryStage.show()
+        return Triple(name, options, skins)
     }
 
     private fun loadGame(primaryStage: Stage, value: String) {
