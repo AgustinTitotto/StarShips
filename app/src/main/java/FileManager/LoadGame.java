@@ -11,11 +11,11 @@ import java.util.List;
 
 import static Controller.Config.*;
 
-public class MyFileReader {
+public class LoadGame {
 
     private final String fileName;
 
-    public MyFileReader(String fileName) {
+    public LoadGame(String fileName) {
         this.fileName = fileName;
     }
 

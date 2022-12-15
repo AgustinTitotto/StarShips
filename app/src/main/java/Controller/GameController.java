@@ -43,11 +43,11 @@ public record GameController(GameState gameState) {
     }
 
     private double getDegreesFromSpawningPosition(Position asteriodSpawnPosition) {
-        if (asteriodSpawnPosition.getX() == 0)
+        if (asteriodSpawnPosition.x() == 0)
             return Math.random() * 179.9 + 0.01;
-        else if (asteriodSpawnPosition.getY() == Y_SIZE - Y_MARGIN)
+        else if (asteriodSpawnPosition.y() == Y_SIZE - Y_MARGIN)
             return Math.random() * 179.9 + 90.01;
-        else if (asteriodSpawnPosition.getX() == X_SIZE - X_MARGIN)
+        else if (asteriodSpawnPosition.x() == X_SIZE - X_MARGIN)
             return Math.random() * 179.9 + 180.01;
         else
             return Math.random() * 179.9 + 270.01;
@@ -70,7 +70,7 @@ public record GameController(GameState gameState) {
         if (shipIsOutOfBound(ship)) {
             return new GameController(new GameState(new ShipController(ship), entities, entitiesToRemove, false));
         } else {
-            return new GameController(new GameState(new ShipController(new Ship(ship.getId(), ship.getTopSpeed(), ship.getAcceleration(), ship.getSpeed(), ship.getWeapon(), ship.getLives(), new Position(getPosition(ship.getPosition().getX(), calculateXCoefficient(ship.getDegrees()), ship.getSpeed()), getPosition(ship.getPosition().getY(), calculateYCoefficient(ship.getDegrees()), ship.getSpeed())), ship.getDegrees(), ship.getSize(), ship.getColliderType(), ship.getPoints())), entities, entitiesToRemove, false));
+            return new GameController(new GameState(new ShipController(new Ship(ship.id(), ship.getTopSpeed(), ship.getAcceleration(), ship.speed(), ship.getWeapon(), ship.getLives(), new Position(getPosition(ship.position().x(), calculateXCoefficient(ship.degrees()), ship.speed()), getPosition(ship.position().y(), calculateYCoefficient(ship.degrees()), ship.speed())), ship.degrees(), ship.size(), ship.colliderType(), ship.getPoints())), entities, entitiesToRemove, false));
         }
     }
 
@@ -79,9 +79,9 @@ public record GameController(GameState gameState) {
         List<MovingEntity> newEntities = new ArrayList<>();
         for (MovingEntity entity : entities) {
             if (entity instanceof Bullet) {
-                newEntities.add(new Bullet(entity.getId(), new Position(getPosition(entity.getPosition().getX(), calculateXCoefficient(entity.getDegrees()), entity.getSpeed()), getPosition(entity.getPosition().getY(), calculateYCoefficient(entity.getDegrees()), entity.getSpeed())), entity.getSpeed(), entity.getDegrees(), entity.getSize(), entity.getColliderType()));
+                newEntities.add(new Bullet(entity.id(), new Position(getPosition(entity.position().x(), calculateXCoefficient(entity.degrees()), entity.speed()), getPosition(entity.position().y(), calculateYCoefficient(entity.degrees()), entity.speed())), entity.speed(), entity.degrees(), entity.size(), entity.colliderType()));
             } else {
-                newEntities.add(new Asteroid(entity.getId(), new Position(getPosition(entity.getPosition().getX(), calculateXCoefficient(entity.getDegrees()), entity.getSpeed()), getPosition(entity.getPosition().getY(), calculateYCoefficient(entity.getDegrees()), entity.getSpeed())), entity.getSpeed(), entity.getDegrees(), entity.getSize(), entity.getColliderType()));
+                newEntities.add(new Asteroid(entity.id(), new Position(getPosition(entity.position().x(), calculateXCoefficient(entity.degrees()), entity.speed()), getPosition(entity.position().y(), calculateYCoefficient(entity.degrees()), entity.speed())), entity.speed(), entity.degrees(), entity.size(), entity.colliderType()));
             }
 
         }
@@ -91,19 +91,20 @@ public record GameController(GameState gameState) {
     private List<MovingEntity> entitiesToRemove(List<MovingEntity> entities) {
         List<MovingEntity> newEntitiesToRemove = new ArrayList<>();
         for (MovingEntity entity : entities) {
-            if (entity.getPosition().getX() >= X_SIZE - X_MARGIN || entity.getPosition().getY() >= Y_SIZE - Y_MARGIN ||
-                    entity.getPosition().getX() <= 0 || entity.getPosition().getY() <= 0) {
+            if (entityIsOutOfBound(entity.position().x(), entity.position().y())) {
                 newEntitiesToRemove.add(entity);
             }
         }
         return newEntitiesToRemove;
     }
 
-    private boolean shipIsOutOfBound(Ship ship) {           // Hacer para que le pueda pasar cualquier entidad (Ast, bala o nave)
-        return getPosition(ship.getPosition().getX(), calculateXCoefficient(ship.getDegrees()), ship.getSpeed()) >= X_SIZE - X_MARGIN ||
-                getPosition(ship.getPosition().getY(), calculateYCoefficient(ship.getDegrees()), ship.getSpeed()) >= Y_SIZE - Y_MARGIN ||
-                getPosition(ship.getPosition().getX(), calculateXCoefficient(ship.getDegrees()), ship.getSpeed()) <= 0 ||
-                getPosition(ship.getPosition().getY(), calculateYCoefficient(ship.getDegrees()), ship.getSpeed()) <= 0;
+    private static boolean entityIsOutOfBound(double posX, double posY) {
+        return posX >= X_SIZE - X_MARGIN || posY >= Y_SIZE - Y_MARGIN ||
+                posX <= 0 || posY <= 0;
+    }
+
+    private boolean shipIsOutOfBound(Ship ship) {
+        return entityIsOutOfBound(getPosition(ship.position().x(), calculateXCoefficient(ship.degrees()), ship.speed()), getPosition(ship.position().y(), calculateYCoefficient(ship.degrees()), ship.speed()));
     }
 
     private double getPosition(double position, double coefficient, double speed) {
@@ -126,28 +127,38 @@ public record GameController(GameState gameState) {
     public GameController handleCollision(@NotNull String element1Id, @NotNull String element2Id, ObservableMap<String, ElementModel> elements) {
         MovingEntity element1 = findEntityById(element1Id);
         MovingEntity element2 = findEntityById(element2Id);
-        if (element1.getId().startsWith("s") && element2.getId().startsWith("a")) {
-            Ship ship = gameState.shipController().ship();
-            return new GameController(new GameState(new ShipController(new Ship(ship.getId(), ship.getTopSpeed(), ship.getAcceleration(), ship.getSpeed(), ship.getWeapon(), ship.getLives() - 1, ship.getPosition(), ship.getDegrees(), ship.getSize(), ship.getColliderType(), ship.getPoints())), gameState.entities(), gameState.entitiesToRemove(), false));
-        } else if (element1.getId().startsWith("a") && element2.getId().startsWith("b")) {
-            List<MovingEntity> entities = gameState.entities();
-            entities.remove(element1);
-            entities.remove(element2);
-            if ((element1.getSize() - gameState.shipController().ship().getWeapon().getDamage()) < ASTEROID_MIN_SIZE) {
-                elements.remove(element1.getId());
-            } else {
-                entities.add(new Asteroid(element1.getId(), element1.getPosition(), element1.getSpeed(), element1.getDegrees(), element1.getSize() - gameState.shipController().ship().getWeapon().getDamage(), element1.getColliderType()));
-            }
-            elements.remove(element2.getId());
-            Ship ship = gameState.shipController().ship();
-            return new GameController(new GameState(new ShipController(new Ship(ship.getId(), ship.getTopSpeed(), ship.getAcceleration(), ship.getSpeed(), ship.getWeapon(), ship.getLives(), ship.getPosition(), ship.getDegrees(), ship.getSize(), ship.getColliderType(), ship.getPoints() + 20)), entities, gameState.entitiesToRemove(), false));
+        if (/*element1.id().startsWith("s") && element2.id().startsWith("a") && */element1 instanceof Ship && element2 instanceof Asteroid) {
+            return shipAsteroidCollision();
+        } else if (/*element1.id().startsWith("a") && element2.id().startsWith("b") && */element1 instanceof Asteroid && element2 instanceof Bullet) {
+            return asteroidBulletCollision(elements, element1, element2);
         } else return this;
+    }
+
+    @NotNull
+    private GameController asteroidBulletCollision(ObservableMap<String, ElementModel> elements, MovingEntity element1, MovingEntity element2) {
+        List<MovingEntity> entities = gameState.entities();
+        entities.remove(element1);
+        entities.remove(element2);
+        if ((element1.size() - gameState.shipController().ship().getWeapon().damage()) < ASTEROID_MIN_SIZE) {
+            elements.remove(element1.id());
+        } else {
+            entities.add(new Asteroid(element1.id(), element1.position(), element1.speed(), element1.degrees(), element1.size() - gameState.shipController().ship().getWeapon().damage(), element1.colliderType()));
+        }
+        elements.remove(element2.id());
+        Ship ship = gameState.shipController().ship();
+        return new GameController(new GameState(new ShipController(new Ship(ship.id(), ship.getTopSpeed(), ship.getAcceleration(), ship.speed(), ship.getWeapon(), ship.getLives(), ship.position(), ship.degrees(), ship.size(), ship.colliderType(), ship.getPoints() + 20)), entities, gameState.entitiesToRemove(), false));
+    }
+
+    @NotNull
+    private GameController shipAsteroidCollision() {
+        Ship ship = gameState.shipController().ship();
+        return new GameController(new GameState(new ShipController(new Ship(ship.id(), ship.getTopSpeed(), ship.getAcceleration(), ship.speed(), ship.getWeapon(), ship.getLives() - 1, ship.position(), ship.degrees(), ship.size(), ship.colliderType(), ship.getPoints())), gameState.entities(), gameState.entitiesToRemove(), false));
     }
 
     @NotNull
     private MovingEntity findEntityById(String elementId) {
         for (int i = 0; i < gameState.entities().size(); i++) {
-            if (gameState.entities().get(i).getId().equalsIgnoreCase(elementId)) {
+            if (gameState.entities().get(i).id().equalsIgnoreCase(elementId)) {
                 return gameState.entities().get(i);
             }
         }

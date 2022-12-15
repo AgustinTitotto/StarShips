@@ -4,11 +4,11 @@ import edu.austral.ingsis.starships.ui.ElementColliderType;
 
 public interface MovingEntity {
 
-    String getId();
-    Position getPosition();
-    double getDegrees();
-    double getSpeed();
-    double getSize();
-    ElementColliderType getColliderType();
+    String id();
+    Position position();
+    double degrees();
+    double speed();
+    double size();
+    ElementColliderType colliderType();
 
 }

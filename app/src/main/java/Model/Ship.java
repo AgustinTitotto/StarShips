@@ -32,7 +32,7 @@ public class Ship implements MovingEntity, Serializable {
         this.points = points;
     }
 
-    public String getId() {
+    public String id() {
         return id;
     }
 
@@ -44,7 +44,7 @@ public class Ship implements MovingEntity, Serializable {
         return acceleration;
     }
 
-    public double getSpeed() {
+    public double speed() {
         return currentSpeed;
     }
 
@@ -56,19 +56,19 @@ public class Ship implements MovingEntity, Serializable {
         return lives;
     }
 
-    public Position getPosition() {
+    public Position position() {
         return position;
     }
 
-    public double getDegrees() {
+    public double degrees() {
         return degrees;
     }
 
-    public double getSize() {
+    public double size() {
         return size;
     }
 
-    public ElementColliderType getColliderType() {
+    public ElementColliderType colliderType() {
         return colliderType;
     }
 

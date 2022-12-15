@@ -5,22 +5,22 @@ import Model.Ship;
 public record ShipController(Ship ship) {
 
     public ShipController increaseSpeed() {
-        if (ship.getSpeed() < ship.getTopSpeed()) {
-            return new ShipController(new Ship(ship.getId(), ship.getTopSpeed(), ship.getAcceleration(), ship.getSpeed() + ship.getAcceleration(), ship.getWeapon(), ship.getLives(), ship.getPosition(), ship.getDegrees(), ship.getSize(), ship.getColliderType(), ship.getPoints()));
+        if (ship.speed() < ship.getTopSpeed()) {
+            return new ShipController(new Ship(ship.id(), ship.getTopSpeed(), ship.getAcceleration(), ship.speed() + ship.getAcceleration(), ship.getWeapon(), ship.getLives(), ship.position(), ship.degrees(), ship.size(), ship.colliderType(), ship.getPoints()));
         } else {
             return this;
         }
     }
 
     public ShipController stop() {
-        if (ship.getSpeed() > 0.0) {
-            return new ShipController(new Ship(ship.getId(), ship.getTopSpeed(), ship.getAcceleration(), 0, ship.getWeapon(), ship.getLives(), ship.getPosition(), ship.getDegrees(), ship.getSize(), ship.getColliderType(), ship.getPoints()));
+        if (ship.speed() > 0.0) {
+            return new ShipController(new Ship(ship.id(), ship.getTopSpeed(), ship.getAcceleration(), 0, ship.getWeapon(), ship.getLives(), ship.position(), ship.degrees(), ship.size(), ship.colliderType(), ship.getPoints()));
         } else {
             return this;
         }
     }
 
     public ShipController changeDirection(double degrees) {
-        return new ShipController(new Ship(ship.getId(), ship.getTopSpeed(), ship.getAcceleration(), ship.getSpeed(), ship.getWeapon(), ship.getLives(), ship.getPosition(), ship.getDegrees() + degrees,  ship.getSize(), ship.getColliderType(), ship.getPoints()));
+        return new ShipController(new Ship(ship.id(), ship.getTopSpeed(), ship.getAcceleration(), ship.speed(), ship.getWeapon(), ship.getLives(), ship.position(), ship.degrees() + degrees,  ship.size(), ship.colliderType(), ship.getPoints()));
     }
 }

@@ -24,32 +24,32 @@ public class Asteroid implements MovingEntity, Serializable {
     }
 
     @Override
-    public String getId() {
+    public String id() {
         return id;
     }
 
     @Override
-    public double getSpeed() {
+    public double speed() {
         return speed;
     }
 
     @Override
-    public double getSize() {
+    public double size() {
         return health;
     }
 
     @Override
-    public Position getPosition() {
+    public Position position() {
         return position;
     }
 
     @Override
-    public double getDegrees() {
+    public double degrees() {
         return degrees;
     }
 
     @Override
-    public ElementColliderType getColliderType() {
+    public ElementColliderType colliderType() {
         return colliderType;
     }
 }
