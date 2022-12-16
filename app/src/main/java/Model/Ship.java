@@ -72,7 +72,14 @@ public class Ship implements MovingEntity, Serializable {
         return colliderType;
     }
 
+    @Override
+    public MovingEntity move(double posX, double posY) {
+        return new Ship(this.id, this.topSpeed, this.acceleration, this.currentSpeed, this.weapon, this.lives, new Position(posX, posY), this.degrees, this.size, this.colliderType, this.points);
+    }
+
     public double getPoints() {
         return points;
     }
+
+
 }

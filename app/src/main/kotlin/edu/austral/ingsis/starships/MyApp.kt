@@ -58,6 +58,7 @@ class MyApp : Application() {
             facade = ElementsViewFacade(imageResolver)
             keyTracker = KeyTracker()
             facade.elements["starship"] = starship
+            facade.showGrid.set(false)
 
             val layout = VBox()
             layout.style = ("-fx-background-image: url('background_image.jpg')")

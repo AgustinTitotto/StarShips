@@ -11,4 +11,6 @@ public interface MovingEntity {
     double size();
     ElementColliderType colliderType();
 
+    /**/
+    MovingEntity move(double posX, double posY);
 }

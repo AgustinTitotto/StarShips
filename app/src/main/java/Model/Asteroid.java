@@ -22,34 +22,34 @@ public class Asteroid implements MovingEntity, Serializable {
         this.degrees = degrees;
         this.colliderType = colliderType;
     }
-
     @Override
     public String id() {
         return id;
     }
-
     @Override
     public double speed() {
         return speed;
     }
-
     @Override
     public double size() {
         return health;
     }
-
     @Override
     public Position position() {
         return position;
     }
-
     @Override
     public double degrees() {
         return degrees;
     }
-
     @Override
     public ElementColliderType colliderType() {
         return colliderType;
     }
+
+    @Override
+    public MovingEntity move(double posX, double posY) {
+        return new Asteroid(this.id, new Position(posX, posY), this.speed, this.degrees, this.health, this.colliderType);
+    }
+
 }

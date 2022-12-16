@@ -78,12 +78,13 @@ public record GameController(GameState gameState) {
     private List<MovingEntity> moveEntities(List<MovingEntity> entities) {
         List<MovingEntity> newEntities = new ArrayList<>();
         for (MovingEntity entity : entities) {
+            /*
             if (entity instanceof Bullet) {
                 newEntities.add(new Bullet(entity.id(), new Position(getPosition(entity.position().x(), calculateXCoefficient(entity.degrees()), entity.speed()), getPosition(entity.position().y(), calculateYCoefficient(entity.degrees()), entity.speed())), entity.speed(), entity.degrees(), entity.size(), entity.colliderType()));
             } else {
                 newEntities.add(new Asteroid(entity.id(), new Position(getPosition(entity.position().x(), calculateXCoefficient(entity.degrees()), entity.speed()), getPosition(entity.position().y(), calculateYCoefficient(entity.degrees()), entity.speed())), entity.speed(), entity.degrees(), entity.size(), entity.colliderType()));
-            }
-
+            }*/
+            newEntities.add(entity.move(getPosition(entity.position().x(), calculateXCoefficient(entity.degrees()), entity.speed()), getPosition(entity.position().y(), calculateYCoefficient(entity.degrees()), entity.speed())));
         }
         return newEntities;
     }
